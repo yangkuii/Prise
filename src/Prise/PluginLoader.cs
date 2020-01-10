@@ -84,13 +84,7 @@ namespace Prise
         protected T[] CreatePluginInstances<T>(IPluginLoadOptions<T> pluginLoadOptions, ref Assembly pluginAssembly)
         {
             var pluginInstances = new List<T>();
-            var pluginTypes = pluginAssembly
-                            .GetTypes()
-                            .Where(t => t.CustomAttributes
-                                .Any(c => c.AttributeType.Name == typeof(Prise.Plugin.PluginAttribute).Name
-                                && (c.NamedArguments.First(a => a.MemberName == "PluginType").TypedValue.Value as Type).Name == typeof(T).Name))
-                            .OrderBy(t => t.Name)
-                            .AsEnumerable();
+            var pluginTypes = pluginLoadOptions.PluginTypesProvider.ProvidePluginTypes(ref pluginAssembly);
 
             if (pluginTypes == null || !pluginTypes.Any())
                 throw new PrisePluginException($@"No plugin was found in assembly {pluginAssembly.FullName}. Requested plugin type: {typeof(T).Name}. Please add the {nameof(PluginAttribute)} to your plugin class and specify the PluginType: [Plugin(PluginType = typeof({typeof(T).Name}))]");
@@ -102,41 +96,47 @@ namespace Prise
 
             foreach (var pluginType in pluginTypes)
             {
-                var bootstrapperType = GetPluginBootstrapper(ref pluginAssembly, pluginType);
-                var pluginFactoryMethod = GetPluginFactoryMethod(pluginType);
+                T pluginProxy = default(T);
+                IPluginBootstrapper bootstrapperProxy = null;
 
-                IPluginBootstrapper bootstrapper = null;
-                if (bootstrapperType != null)
+                var pluginActivationContext = pluginLoadOptions.PluginActivationContextProvider.ProvideActivationContext(pluginType, ref pluginAssembly);
+                if (pluginActivationContext.PluginBootstrapperType != null)
                 {
-                    var remoteBootstrapperInstance = pluginLoadOptions.Activator.CreateRemoteBootstrapper(bootstrapperType, pluginAssembly);
+                    var remoteBootstrapperInstance = pluginLoadOptions.Activator.CreateRemoteBootstrapper(pluginActivationContext.PluginBootstrapperType, pluginAssembly);
                     var remoteBootstrapperProxy = pluginLoadOptions.ProxyCreator.CreateBootstrapperProxy(remoteBootstrapperInstance);
                     this.disposables.Add(remoteBootstrapperProxy as IDisposable);
-                    bootstrapper = remoteBootstrapperProxy;
+                    bootstrapperProxy = remoteBootstrapperProxy;
                 }
 
-                var remoteObject = pluginLoadOptions.Activator.CreateRemoteInstance(pluginType, bootstrapper, pluginFactoryMethod, pluginAssembly);
-                var remoteProxy = pluginLoadOptions.ProxyCreator.CreatePluginProxy(remoteObject, pluginLoadOptions);
-                this.disposables.Add(remoteProxy as IDisposable);
-                pluginInstances.Add(remoteProxy);
+                var remoteObject = pluginLoadOptions.Activator.CreateRemoteInstance(
+                    pluginActivationContext.PluginType, 
+                    bootstrapperProxy,
+                    pluginActivationContext.PluginFactoryMethod,
+                    pluginActivationContext.PluginAssembly);
+
+                pluginProxy = pluginLoadOptions.ProxyCreator.CreatePluginProxy(remoteObject, pluginLoadOptions);
+
+                this.disposables.Add(pluginProxy as IDisposable);
+                pluginInstances.Add(pluginProxy);
             }
 
             return pluginInstances.ToArray();
         }
 
-        protected Type GetPluginBootstrapper(ref Assembly pluginAssembly, Type pluginType)
-        {
-            return pluginAssembly
-                    .GetTypes()
-                    .Where(t => t.CustomAttributes
-                        .Any(c => c.AttributeType.Name == typeof(Prise.Plugin.PluginBootstrapperAttribute).Name &&
-                        (c.NamedArguments.First(a => a.MemberName == "PluginType").TypedValue.Value as Type).Name == pluginType.Name)).FirstOrDefault();
-        }
+        //protected Type GetPluginBootstrapper(ref Assembly pluginAssembly, Type pluginType)
+        //{
+        //    return pluginAssembly
+        //            .GetTypes()
+        //            .Where(t => t.CustomAttributes
+        //                .Any(c => c.AttributeType.Name == typeof(Prise.Plugin.PluginBootstrapperAttribute).Name &&
+        //                (c.NamedArguments.First(a => a.MemberName == "PluginType").TypedValue.Value as Type).Name == pluginType.Name)).FirstOrDefault();
+        //}
 
-        protected MethodInfo GetPluginFactoryMethod(Type pluginType)
-        {
-            return pluginType.GetMethods()
-                    .Where(m => m.CustomAttributes
-                        .Any(c => c.AttributeType.Name == typeof(Prise.Plugin.PluginFactoryAttribute).Name)).FirstOrDefault();
-        }
+        //protected MethodInfo GetPluginFactoryMethod(Type pluginType)
+        //{
+        //    return pluginType.GetMethods()
+        //            .Where(m => m.CustomAttributes
+        //                .Any(c => c.AttributeType.Name == typeof(Prise.Plugin.PluginFactoryAttribute).Name)).FirstOrDefault();
+        //}
     }
 }

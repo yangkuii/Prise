@@ -21,6 +21,10 @@ namespace Prise
         internal ISharedServicesProvider<T> sharedServicesProvider;
         internal Type sharedServicesProviderType;
         internal IRemotePluginActivator activator;
+        internal IPluginActivationContextProvider<T> pluginActivationContextProvider;
+        internal Type pluginActivationContextProviderType;
+        internal IPluginTypesProvider<T> pluginTypesProvider;
+        internal Type pluginTypesProviderType;
         internal Type activatorType;
         internal IProxyCreator<T> proxyCreator;
         internal Type proxyCreatorType;
@@ -451,6 +455,8 @@ namespace Prise
 
             this.pluginAssemblyNameProvider = new PluginAssemblyNameProvider<T>($"{typeof(T).Name}.dll");
             this.sharedServicesProvider = new DefaultSharedServicesProvider<T>(new ServiceCollection());
+            this.pluginActivationContextProvider = new DefaultPluginActivationContextProvider<T>();
+            this.pluginTypesProvider = new DefaultPluginTypesProvider<T>();
             this.activator = new DefaultRemotePluginActivator<T>(this.sharedServicesProvider);
             this.proxyCreator = new PluginProxyCreator<T>();
 
@@ -502,6 +508,8 @@ namespace Prise
                 .RegisterTypeOrInstance<IPluginPathProvider<T>>(pluginPathProviderType, pluginPathProvider)
                 .RegisterTypeOrInstance<IAssemblyScanner<T>>(assemblyScannerType, assemblyScanner)
                 .RegisterTypeOrInstance<IAssemblyScannerOptions<T>>(assemblyScannerOptionsType, assemblyScannerOptions)
+                .RegisterTypeOrInstance<IPluginTypesProvider<T>>(pluginTypesProviderType, pluginTypesProvider)
+                .RegisterTypeOrInstance<IPluginActivationContextProvider<T>>(pluginActivationContextProviderType, pluginActivationContextProvider)
                 .RegisterTypeOrInstance<IProxyCreator<T>>(proxyCreatorType, proxyCreator)
                 .RegisterTypeOrInstance<ISharedServicesProvider<T>>(sharedServicesProviderType, sharedServicesProvider)
                 .RegisterTypeOrInstance<IPluginAssemblyNameProvider<T>>(pluginAssemblyNameProviderType, pluginAssemblyNameProvider)

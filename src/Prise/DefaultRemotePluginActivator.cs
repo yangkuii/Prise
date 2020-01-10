@@ -32,6 +32,8 @@ namespace Prise
 
         public object CreateRemoteInstance(Type pluginType, IPluginBootstrapper bootstrapper, MethodInfo factoryMethod, Assembly assembly)
         {
+            // TODO Check out RuntimeHelpers.GetUninitializedObject(pluginType);
+
             var contructors = pluginType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
 
             if (contructors.Count() > 1)

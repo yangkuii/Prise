@@ -8,6 +8,8 @@ namespace Prise.Infrastructure
         IAssemblyScanner<T> AssemblyScanner { get; }
         IPluginAssemblyLoader<T> AssemblyLoader { get; }
         ISharedServicesProvider<T> SharedServicesProvider { get; }
+        IPluginTypesProvider<T> PluginTypesProvider { get; }
+        IPluginActivationContextProvider<T> PluginActivationContextProvider { get; }
         IRemotePluginActivator Activator { get; }
         IResultConverter ResultConverter { get; }
         IParameterConverter ParameterConverter { get; }

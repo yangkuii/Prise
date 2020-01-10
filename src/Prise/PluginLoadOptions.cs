@@ -8,6 +8,8 @@ namespace Prise
     {
         private readonly IAssemblyScanner<T> assemblyScanner;
         private readonly ISharedServicesProvider<T> sharedServicesProvider;
+        private readonly IPluginTypesProvider<T> pluginTypesProvider;
+        private readonly IPluginActivationContextProvider<T> pluginActivationContextProvider;
         private readonly IRemotePluginActivator activator;
         private readonly IResultConverter resultConverter;
         private readonly IParameterConverter parameterConverter;
@@ -20,9 +22,12 @@ namespace Prise
         private readonly IPluginSelector<T> pluginSelector;
         protected bool disposed = false;
 
+        // Use the ASP.NET Core DI system to inject these dependencies
         public PluginLoadOptions(
             IAssemblyScanner<T> assemblyScanner,
             ISharedServicesProvider<T> sharedServicesProvider,
+            IPluginTypesProvider<T> pluginTypesProvider,
+            IPluginActivationContextProvider<T> pluginActivationContextProvider,
             IRemotePluginActivator activator,
             IParameterConverter parameterConverter,
             IResultConverter resultConverter,
@@ -37,6 +42,8 @@ namespace Prise
         {
             this.assemblyScanner = assemblyScanner;
             this.sharedServicesProvider = sharedServicesProvider;
+            this.pluginTypesProvider = pluginTypesProvider;
+            this.pluginActivationContextProvider = pluginActivationContextProvider;
             this.activator = activator;
             this.parameterConverter = parameterConverter;
             this.resultConverter = resultConverter;
@@ -51,6 +58,8 @@ namespace Prise
 
         public IAssemblyScanner<T> AssemblyScanner => this.assemblyScanner;
         public ISharedServicesProvider<T> SharedServicesProvider => this.sharedServicesProvider;
+        public IPluginTypesProvider<T> PluginTypesProvider => this.pluginTypesProvider;
+        public IPluginActivationContextProvider<T> PluginActivationContextProvider => this.pluginActivationContextProvider;
         public IRemotePluginActivator Activator => this.activator;
         public IResultConverter ResultConverter => this.resultConverter;
         public IParameterConverter ParameterConverter => this.parameterConverter;

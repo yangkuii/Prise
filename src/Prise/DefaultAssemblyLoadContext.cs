@@ -27,6 +27,7 @@ namespace Prise
         protected ConcurrentDictionary<string, IntPtr> loadedNativeLibraries;
         protected bool disposed = false;
         protected bool disposing = false;
+        protected ConcurrentBag<string> loadedPlugins;
 
         public DefaultAssemblyLoadContext(
             IAssemblyLoadOptions<T> options,
@@ -53,12 +54,26 @@ namespace Prise
             this.nativeAssemblyUnloader = nativeAssemblyUnloader;
             this.assemblyLoadStrategyProvider = assemblyLoadStrategyProvider;
             this.loadedNativeLibraries = new ConcurrentDictionary<string, IntPtr>();
+            this.loadedPlugins = new ConcurrentBag<string>();
+        }
+
+        private void GuardIfAlreadyLoaded(string pluginAssemblyName)
+        {
+            if (this.disposed || this.disposing)
+                throw new PrisePluginException($"Cannot load Plugin {pluginAssemblyName} when disposed.");
+
+            if (String.IsNullOrEmpty(pluginAssemblyName))
+                throw new PrisePluginException($"Cannot load empty Plugin. {nameof(pluginAssemblyName)} was null or empty.");
+
+            if (this.loadedPlugins.Contains(pluginAssemblyName))
+                throw new PrisePluginException($"Plugin {pluginAssemblyName} was already loaded.");
+
+            this.loadedPlugins.Add(pluginAssemblyName);
         }
 
         public virtual Assembly LoadPluginAssembly(IPluginLoadContext pluginLoadContext)
         {
-            if (this.pluginDependencyContext != null)
-                throw new PrisePluginException($"Plugin {pluginLoadContext.PluginAssemblyName} was already loaded");
+            GuardIfAlreadyLoaded(pluginLoadContext?.PluginAssemblyName);
 
             this.pluginDependencyContext = PluginDependencyContext.FromPluginAssembly<T>(
                 pluginLoadContext,
@@ -79,8 +94,7 @@ namespace Prise
 
         public virtual async Task<Assembly> LoadPluginAssemblyAsync(IPluginLoadContext pluginLoadContext)
         {
-            if (this.pluginDependencyContext != null)
-                throw new PrisePluginException($"Plugin {pluginLoadContext.PluginAssemblyName} was already loaded");
+            GuardIfAlreadyLoaded(pluginLoadContext?.PluginAssemblyName);
 
             this.pluginDependencyContext = await PluginDependencyContext.FromPluginAssemblyAsync(
                 pluginLoadContext,
@@ -230,7 +244,7 @@ namespace Prise
         {
             // This fixes the issue where the ALC is still alive and utilized in the host
             if (this.disposed || this.disposing)
-                return IntPtr.Zero; 
+                return IntPtr.Zero;
 
             IntPtr library = IntPtr.Zero;
 

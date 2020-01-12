@@ -1,13 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
-    <Title>Prise</Title>
-    <PackageId>Prise</PackageId>
-    <PackageDescription>Prise, A .NET Core plugin framework!</PackageDescription>
+    <Title>Prise.Mvc</Title>
+    <PackageId>Prise.Mvc</PackageId>
+    <PackageDescription>Adds ASP.NET Core MVC features to an existing Prise setup!</PackageDescription>
     <Authors>Maarten Merken</Authors>
     <Company>MRKN</Company>
-    <PackageTags>plugin;framework;prise;decoupling;assembly;dispatchproxy;proxy</PackageTags>
+    <PackageTags>controllers;plugin</PackageTags>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
@@ -20,22 +19,10 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
     <DefineConstants>NETCORE2_1</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <Compile Remove="netcore3.0\**\*.cs" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>NETCORE3_0</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <Compile Remove="netcore2.1\**\*.cs" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0" />
-  </ItemGroup>
 
   <PropertyGroup>
     <PackageIcon>icon.png</PackageIcon>
@@ -50,9 +37,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Prise\Prise.csproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>Prise.dll</IncludeAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Prise.AssemblyScanning\Prise.AssemblyScanning.csproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>Prise.AssemblyScanning.dll</IncludeAssets>
+    </ProjectReference>
     <ProjectReference Include="..\Prise.Plugin\Prise.Plugin.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <IncludeAssets>Prise.Plugin.dll</IncludeAssets>
     </ProjectReference>
   </ItemGroup>
+
 </Project>

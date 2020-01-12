@@ -30,7 +30,7 @@ namespace Prise
             return assembly.CreateInstance(bootstrapperType.FullName);
         }
 
-        public object CreateRemoteInstance(Type pluginType, IPluginBootstrapper bootstrapper, MethodInfo factoryMethod, Assembly assembly)
+        public object CreateRemoteInstance(Type pluginType, Assembly assembly, IPluginBootstrapper bootstrapper = null, MethodInfo factoryMethod = null)
         {
             // TODO Check out RuntimeHelpers.GetUninitializedObject(pluginType);
 

@@ -109,10 +109,11 @@ namespace Prise
                 }
 
                 var remoteObject = pluginLoadOptions.Activator.CreateRemoteInstance(
-                    pluginActivationContext.PluginType, 
+                    pluginActivationContext.PluginType,
+                    pluginActivationContext.PluginAssembly,
                     bootstrapperProxy,
-                    pluginActivationContext.PluginFactoryMethod,
-                    pluginActivationContext.PluginAssembly);
+                    pluginActivationContext.PluginFactoryMethod
+                );
 
                 pluginProxy = pluginLoadOptions.ProxyCreator.CreatePluginProxy(remoteObject, pluginLoadOptions);
 

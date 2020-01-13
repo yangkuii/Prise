@@ -7,7 +7,7 @@ namespace Prise
 {
     public class DefaultPluginActivationContextProvider<T> : IPluginActivationContextProvider<T>
     {
-        public PluginActivationContext ProvideActivationContext(Type remoteType, ref Assembly pluginAssembly)
+        public PluginActivationContext ProvideActivationContext(Type remoteType, Assembly pluginAssembly)
         {
             var bootstrapper = pluginAssembly
                     .GetTypes()

@@ -84,7 +84,7 @@ namespace Prise
         protected T[] CreatePluginInstances<T>(IPluginLoadOptions<T> pluginLoadOptions, ref Assembly pluginAssembly)
         {
             var pluginInstances = new List<T>();
-            var pluginTypes = pluginLoadOptions.PluginTypesProvider.ProvidePluginTypes(ref pluginAssembly);
+            var pluginTypes = pluginLoadOptions.PluginTypesProvider.ProvidePluginTypes(pluginAssembly);
 
             if (pluginTypes == null || !pluginTypes.Any())
                 throw new PrisePluginException($@"No plugin was found in assembly {pluginAssembly.FullName}. Requested plugin type: {typeof(T).Name}. Please add the {nameof(PluginAttribute)} to your plugin class and specify the PluginType: [Plugin(PluginType = typeof({typeof(T).Name}))]");
@@ -99,7 +99,7 @@ namespace Prise
                 T pluginProxy = default(T);
                 IPluginBootstrapper bootstrapperProxy = null;
 
-                var pluginActivationContext = pluginLoadOptions.PluginActivationContextProvider.ProvideActivationContext(pluginType, ref pluginAssembly);
+                var pluginActivationContext = pluginLoadOptions.PluginActivationContextProvider.ProvideActivationContext(pluginType, pluginAssembly);
                 if (pluginActivationContext.PluginBootstrapperType != null)
                 {
                     var remoteBootstrapperInstance = pluginLoadOptions.Activator.CreateRemoteBootstrapper(pluginActivationContext.PluginBootstrapperType, pluginAssembly);

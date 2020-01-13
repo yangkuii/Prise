@@ -6,6 +6,6 @@ namespace Prise.Infrastructure
 {
     public interface IPluginTypesProvider<T>
     {
-        IEnumerable<Type> ProvidePluginTypes(ref Assembly pluginAssembly);
+        IEnumerable<Type> ProvidePluginTypes(Assembly pluginAssembly);
     }
 }

@@ -10,6 +10,8 @@ namespace Prise
 {
     public class PluginLoadOptionsBuilder<T>
     {
+        internal ServiceLifetime priseServiceLifetime;
+        internal CacheOptions<IPluginCache<T>> cacheOptions;
         internal IAssemblyScanner<T> assemblyScanner;
         internal Type assemblyScannerType;
         internal IAssemblyScannerOptions<T> assemblyScannerOptions;
@@ -76,10 +78,28 @@ namespace Prise
             return this;
         }
 
+        public PluginLoadOptionsBuilder<T> WithPriseServiceLifetime(ServiceLifetime serviceLifetime)
+        {
+            this.priseServiceLifetime = serviceLifetime;
+            return this;
+        }
+
         public PluginLoadOptionsBuilder<T> WithPluginPathProvider<TType>()
             where TType : IPluginPathProvider<T>
         {
             this.pluginPathProviderType = typeof(TType);
+            return this;
+        }
+
+        public PluginLoadOptionsBuilder<T> WithSingletonCache()
+        {
+            this.cacheOptions = CacheOptions<IPluginCache<T>>.SingletonPluginCache();
+            return this;
+        }
+
+        public PluginLoadOptionsBuilder<T> WithCachingOptions(ServiceLifetime serviceLifetime)
+        {
+            this.cacheOptions = new CacheOptions<IPluginCache<T>>(serviceLifetime);
             return this;
         }
 
@@ -441,13 +461,14 @@ namespace Prise
             return this;
         }
 
-        public PluginLoadOptionsBuilder<T> WithDefaultOptions(string pluginPath = null)
+        public PluginLoadOptionsBuilder<T> WithDefaultOptions(string pluginPath = null, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
         {
             if (String.IsNullOrEmpty(pluginPath))
                 pluginPath = Path.Join(GetLocalExecutionPath(), "Plugins");
 
             this.pluginPathProvider = new DefaultPluginPathProvider<T>(pluginPath);
             this.dependencyPathProvider = new DependencyPathProvider<T>(pluginPath);
+            this.cacheOptions = CacheOptions<IPluginCache<T>>.ScopedPluginCache();
 
             this.runtimePlatformContext = new RuntimePlatformContext();
             this.ScanForAssemblies(composer =>
@@ -503,57 +524,64 @@ namespace Prise
 
         internal IServiceCollection RegisterOptions(IServiceCollection services)
         {
+            // Caching
+            services.Add(new ServiceDescriptor(typeof(IPluginCache<T>), typeof(DefaultScopedPluginCache<T>), this.cacheOptions.Lifetime));
+
             services
                 // Plugin-specific services
-                .RegisterTypeOrInstance<IPluginPathProvider<T>>(pluginPathProviderType, pluginPathProvider)
-                .RegisterTypeOrInstance<IAssemblyScanner<T>>(assemblyScannerType, assemblyScanner)
-                .RegisterTypeOrInstance<IAssemblyScannerOptions<T>>(assemblyScannerOptionsType, assemblyScannerOptions)
-                .RegisterTypeOrInstance<IPluginTypesProvider<T>>(pluginTypesProviderType, pluginTypesProvider)
-                .RegisterTypeOrInstance<IPluginActivationContextProvider<T>>(pluginActivationContextProviderType, pluginActivationContextProvider)
-                .RegisterTypeOrInstance<IProxyCreator<T>>(proxyCreatorType, proxyCreator)
-                .RegisterTypeOrInstance<ISharedServicesProvider<T>>(sharedServicesProviderType, sharedServicesProvider)
-                .RegisterTypeOrInstance<IPluginAssemblyNameProvider<T>>(pluginAssemblyNameProviderType, pluginAssemblyNameProvider)
-                .RegisterTypeOrInstance<IPluginAssemblyLoader<T>>(assemblyLoaderType, assemblyLoader)
-                .RegisterTypeOrInstance<IRemoteTypesProvider<T>>(remoteTypesProviderType, remoteTypesProvider)
-                .RegisterTypeOrInstance<IDependencyPathProvider<T>>(dependencyPathProviderType, dependencyPathProvider)
-                .RegisterTypeOrInstance<IProbingPathsProvider<T>>(probingPathsProviderType, probingPathsProvider)
-                .RegisterTypeOrInstance<IAssemblySelector<T>>(assemblySelectorType, assemblySelector)
-                .RegisterTypeOrInstance<IPluginSelector<T>>(pluginSelectorType, pluginSelector)
-                .RegisterTypeOrInstance<IDepsFileProvider<T>>(depsFileProviderType, depsFileProvider)
-                .RegisterTypeOrInstance<IPluginDependencyResolver<T>>(pluginDependencyResolverType, pluginDependencyResolver)
-                .RegisterTypeOrInstance<ITempPathProvider<T>>(tempPathProviderType, tempPathProvider)
+                .RegisterTypeOrInstance<IPluginPathProvider<T>>(pluginPathProviderType, pluginPathProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IAssemblyScanner<T>>(assemblyScannerType, assemblyScanner, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IAssemblyScannerOptions<T>>(assemblyScannerOptionsType, assemblyScannerOptions, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginTypesProvider<T>>(pluginTypesProviderType, pluginTypesProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginActivationContextProvider<T>>(pluginActivationContextProviderType, pluginActivationContextProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IProxyCreator<T>>(proxyCreatorType, proxyCreator, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<ISharedServicesProvider<T>>(sharedServicesProviderType, sharedServicesProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginAssemblyNameProvider<T>>(pluginAssemblyNameProviderType, pluginAssemblyNameProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginAssemblyLoader<T>>(assemblyLoaderType, assemblyLoader, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IRemoteTypesProvider<T>>(remoteTypesProviderType, remoteTypesProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IDependencyPathProvider<T>>(dependencyPathProviderType, dependencyPathProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IProbingPathsProvider<T>>(probingPathsProviderType, probingPathsProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IAssemblySelector<T>>(assemblySelectorType, assemblySelector, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginSelector<T>>(pluginSelectorType, pluginSelector, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IDepsFileProvider<T>>(depsFileProviderType, depsFileProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginDependencyResolver<T>>(pluginDependencyResolverType, pluginDependencyResolver, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<ITempPathProvider<T>>(tempPathProviderType, tempPathProvider, this.priseServiceLifetime)
 
                 // Global services
-                .RegisterTypeOrInstance<IAssemblyLoadStrategyProvider>(assemblyLoadStrategyProviderType, assemblyLoadStrategyProvider)
-                .RegisterTypeOrInstance<IRemotePluginActivator>(activatorType, activator)
-                .RegisterTypeOrInstance<IResultConverter>(resultConverterType, resultConverter)
-                .RegisterTypeOrInstance<IParameterConverter>(parameterConverterType, parameterConverter)
-                .RegisterTypeOrInstance<IHostTypesProvider>(hostTypesProviderType, hostTypesProvider)
-                .RegisterTypeOrInstance<IRuntimePlatformContext>(runtimePlatformContextType, runtimePlatformContext)
-                .RegisterTypeOrInstance<INativeAssemblyUnloader>(nativeAssemblyUnloaderType, nativeAssemblyUnloader)
-                .RegisterTypeOrInstance<IHostFrameworkProvider>(hostFrameworkProviderType, hostFrameworkProvider)
+                .RegisterTypeOrInstance<IAssemblyLoadStrategyProvider>(assemblyLoadStrategyProviderType, assemblyLoadStrategyProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IRemotePluginActivator>(activatorType, activator, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IResultConverter>(resultConverterType, resultConverter, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IParameterConverter>(parameterConverterType, parameterConverter, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IHostTypesProvider>(hostTypesProviderType, hostTypesProvider, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IRuntimePlatformContext>(runtimePlatformContextType, runtimePlatformContext, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<INativeAssemblyUnloader>(nativeAssemblyUnloaderType, nativeAssemblyUnloader, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IHostFrameworkProvider>(hostFrameworkProviderType, hostFrameworkProvider, this.priseServiceLifetime)
                 ;
 
             if (assemblyLoadOptions != null)
                 services
-                    .AddScoped<IAssemblyLoadOptions<T>>(s => assemblyLoadOptions);
+                    .Add(new ServiceDescriptor(typeof(IAssemblyLoadOptions<T>), s => assemblyLoadOptions, this.priseServiceLifetime));
             if (assemblyLoadOptionsType != null)
                 services
-                    .AddScoped(typeof(IAssemblyLoadOptions<T>), assemblyLoadOptionsType);
+                    .Add(new ServiceDescriptor(typeof(IAssemblyLoadOptions<T>), assemblyLoadOptionsType, this.priseServiceLifetime));
 
             if (networkAssemblyLoaderOptions != null)
-                services
-                    .AddScoped<INetworkAssemblyLoaderOptions<T>>(s => networkAssemblyLoaderOptions)
-                    .AddScoped<IAssemblyLoadOptions<T>>(s => networkAssemblyLoaderOptions);
+            {
+                services.Add(new ServiceDescriptor(typeof(INetworkAssemblyLoaderOptions<T>), s => networkAssemblyLoaderOptions, this.priseServiceLifetime));
+                services.Add(new ServiceDescriptor(typeof(IAssemblyLoadOptions<T>), s => networkAssemblyLoaderOptions, this.priseServiceLifetime));
+            }
             if (networkAssemblyLoaderOptionsType != null)
-                services
-                    .AddScoped(typeof(INetworkAssemblyLoaderOptions<T>), networkAssemblyLoaderOptionsType)
-                    .AddScoped(typeof(IAssemblyLoadOptions<T>), networkAssemblyLoaderOptionsType);
+            {
+                services.Add(new ServiceDescriptor(typeof(INetworkAssemblyLoaderOptions<T>), networkAssemblyLoaderOptionsType, this.priseServiceLifetime));
+                services.Add(new ServiceDescriptor(typeof(IAssemblyLoadOptions<T>), networkAssemblyLoaderOptionsType, this.priseServiceLifetime));
+            }
 
             configureServices?.Invoke(services);
 
             // Make use of DI by providing an injected instance of the registered services above
-            return services.AddScoped<IPluginLoadOptions<T>, PluginLoadOptions<T>>();
+            services.Add(new ServiceDescriptor(typeof(IPluginLoadOptions<T>), typeof(PluginLoadOptions<T>), this.priseServiceLifetime));
+
+            return services;
         }
 
         private string GetLocalExecutionPath() => AppDomain.CurrentDomain.BaseDirectory;
@@ -561,13 +589,13 @@ namespace Prise
 
     internal static class PluginLoadOptionsBuilderExtensions
     {
-        internal static IServiceCollection RegisterTypeOrInstance<TType>(this IServiceCollection services, Type type, TType instance)
+        internal static IServiceCollection RegisterTypeOrInstance<TType>(this IServiceCollection services, Type type, TType instance, ServiceLifetime serviceLifetime)
             where TType : class
         {
             if (type != null)
-                services.AddScoped(typeof(TType), type);
+                services.Add(new ServiceDescriptor(typeof(TType), type, serviceLifetime));
             else if (instance != null)
-                services.AddScoped<TType>(s => instance);
+                services.Add(new ServiceDescriptor(typeof(TType), s => instance, serviceLifetime));
             else
                 throw new PrisePluginException($"Could not find type {type?.Name} or instance {typeof(TType).Name} to register");
 

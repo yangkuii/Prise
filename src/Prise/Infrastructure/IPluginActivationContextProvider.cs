@@ -5,6 +5,6 @@ namespace Prise.Infrastructure
 {
     public interface IPluginActivationContextProvider<T>
     {
-        PluginActivationContext ProvideActivationContext(Type remoteType, ref Assembly pluginAssembly);
+        PluginActivationContext ProvideActivationContext(Type remoteType, Assembly pluginAssembly);
     }
 }

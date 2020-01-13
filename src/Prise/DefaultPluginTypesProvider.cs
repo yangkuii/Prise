@@ -8,7 +8,7 @@ namespace Prise
 {
     public class DefaultPluginTypesProvider<T> : IPluginTypesProvider<T>
     {
-        public IEnumerable<Type> ProvidePluginTypes(ref Assembly pluginAssembly)
+        public IEnumerable<Type> ProvidePluginTypes(Assembly pluginAssembly)
         {
             return pluginAssembly
                             .GetTypes()

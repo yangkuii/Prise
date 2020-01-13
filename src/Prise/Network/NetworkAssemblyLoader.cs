@@ -23,32 +23,35 @@ namespace Prise
             IHttpClientFactory httpClientFactory
             )
         {
-            this.loadContext = new NetworkAssemblyLoadContext<T>(
-                options,
-                hostFrameworkProvider,
-                hostTypesProvider,
-                remoteTypesProvider,
-                dependencyPathProvider,
-                probingPathsProvider,
-                runtimePlatformContext,
-                depsFileProvider,
-                pluginDependencyResolver,
-                nativeAssemblyUnloader,
-                assemblyLoadStrategyProvider,
-                httpClientFactory,
-                tempPathProvider
-            );
-            this.assemblyLoadContextReference = new System.WeakReference(this.loadContext);
+            //TODO
+            //this.loadContext = new NetworkAssemblyLoadContext<T>(
+            //    options,
+            //    hostFrameworkProvider,
+            //    hostTypesProvider,
+            //    remoteTypesProvider,
+            //    dependencyPathProvider,
+            //    probingPathsProvider,
+            //    runtimePlatformContext,
+            //    depsFileProvider,
+            //    pluginDependencyResolver,
+            //    nativeAssemblyUnloader,
+            //    assemblyLoadStrategyProvider,
+            //    httpClientFactory,
+            //    tempPathProvider
+            //);
+            //this.assemblyLoadContextReference = new System.WeakReference(this.loadContext);
         }
 
         public virtual Assembly Load(IPluginLoadContext pluginLoadContext)
         {
-            return this.loadContext.LoadPluginAssembly(pluginLoadContext);
+            return null;
+            //return this.loadContext.LoadPluginAssembly(pluginLoadContext);
         }
 
         public virtual Task<Assembly> LoadAsync(IPluginLoadContext pluginLoadContext)
         {
-            return this.loadContext.LoadPluginAssemblyAsync(pluginLoadContext);
+            return null;
+            //return this.loadContext.LoadPluginAssemblyAsync(pluginLoadContext);
         }
     }
 }

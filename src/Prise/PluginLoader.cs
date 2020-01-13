@@ -73,12 +73,12 @@ namespace Prise
 
         protected void Unload<T>(IPluginLoadOptions<T> pluginLoadOptions)
         {
-            pluginLoadOptions.AssemblyLoader.Unload();
+            pluginLoadOptions.AssemblyLoader.UnloadAll();
         }
 
         protected async Task UnloadAsync<T>(IPluginLoadOptions<T> pluginLoadOptions)
         {
-            await pluginLoadOptions.AssemblyLoader.UnloadAsync();
+            await pluginLoadOptions.AssemblyLoader.UnloadAllAsync();
         }
 
         protected T[] CreatePluginInstances<T>(IPluginLoadOptions<T> pluginLoadOptions, ref Assembly pluginAssembly)

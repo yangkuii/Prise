@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
+using Prise.Infrastructure;
 using Prise.Mvc.Infrastructure;
 
 namespace Prise.Mvc
@@ -24,12 +27,13 @@ namespace Prise.Mvc
         {
             var actionDescriptorChangeProvider = new PriseActionDescriptorChangeProvider();
             return builder
-                // Use a singleton cache
+                 // Use a singleton cache
                  .WithSingletonCache()
                  .ConfigureServices(services =>
                  services
                      .Configure<RazorViewEngineOptions>(options =>
                      {
+                         options.FileProviders.Add(new PrisePluginEmbeddedFileProvider<T>(services.BuildServiceProvider().GetService(typeof(IPluginCache<T>)) as IPluginCache<T>));
                          options.ViewLocationExpanders.Add(new PriseViewLocationExpander());
                      })
                      // Registers the change provider
@@ -39,7 +43,9 @@ namespace Prise.Mvc
                      .Replace(ServiceDescriptor.Transient<IRazorPageActivator, PriseRazorPageActivator<T>>())
                      .Replace(ServiceDescriptor.Transient<IControllerActivator, PriseControllersAsPluginActivator<T>>()))
                  // Makes sure controllers can be casted to the host's representation of ControllerBase
-                 .WithHostType(typeof(ControllerBase));
+                 .WithHostType(typeof(ControllerBase))
+                 .WithHostType(typeof(ITempDataDictionaryFactory))
+            ;
         }
     }
 }

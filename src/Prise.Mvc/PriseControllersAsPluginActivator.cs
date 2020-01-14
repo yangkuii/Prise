@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Prise.Infrastructure;
 using Prise.Plugin;
@@ -36,6 +38,11 @@ namespace Prise.Mvc
                         pluginAssembly,
                         bootstrapperProxy,
                         pluginActivationContext.PluginFactoryMethod);
+
+                    var controllerContext = new ControllerContext();
+                    controllerContext.HttpContext = context.HttpContext;
+                    var controllerContextProperty = controllerType.GetProperty("ControllerContext");
+                    controllerContextProperty.SetValue(remoteController, controllerContext);
 
                     return remoteController;
                 }

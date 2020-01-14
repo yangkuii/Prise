@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Prise.Mvc.Infrastructure;
@@ -27,10 +28,15 @@ namespace Prise.Mvc
                  .WithSingletonCache()
                  .ConfigureServices(services =>
                  services
+                     .Configure<RazorViewEngineOptions>(options =>
+                     {
+                         options.ViewLocationExpanders.Add(new PriseViewLocationExpander());
+                     })
                      // Registers the change provider
                      .AddSingleton<IPriseActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
                      .AddSingleton<IActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
                      // Registers the activator for controllers from plugin assemblies
+                     .Replace(ServiceDescriptor.Transient<IRazorPageActivator, PriseRazorPageActivator<T>>())
                      .Replace(ServiceDescriptor.Transient<IControllerActivator, PriseControllersAsPluginActivator<T>>()))
                  // Makes sure controllers can be casted to the host's representation of ControllerBase
                  .WithHostType(typeof(ControllerBase));

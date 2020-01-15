@@ -7,6 +7,6 @@ namespace Prise.Mvc.Infrastructure
 {
     public interface IPriseRemoteControllerActivator : IRemotePluginActivator
     {
-
+        // TODO
     }
 }

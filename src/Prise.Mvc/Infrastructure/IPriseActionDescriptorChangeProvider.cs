@@ -5,3 +5,4 @@
         void TriggerPluginChanged();
     }
 }
+ 

@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Razor;
+#if NETCORE3_0
+
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+#endif
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.FileProviders;
-using Prise.Infrastructure;
 using Prise.Mvc.Infrastructure;
 
 namespace Prise.Mvc
@@ -23,25 +25,40 @@ namespace Prise.Mvc
         /// <typeparam name="T">The Plugin Contract Type</typeparam>
         /// <param name="builder"></param>
         /// <returns>A fully configured Prise setup that will load Controllers from Plugin Assemblies</returns>
-        public static PluginLoadOptionsBuilder<T> AddPriseControllersAsPlugins<T>(this PluginLoadOptionsBuilder<T> builder)
+        public static PluginLoadOptionsBuilder<T> AddPriseControllersAsPlugins<T>(this PluginLoadOptionsBuilder<T> builder, string webRootPath)
         {
             var actionDescriptorChangeProvider = new PriseActionDescriptorChangeProvider();
+#if NETCORE2_1
+            System.Diagnostics.Debugger.Break();
+#endif
+#if NETCORE3_0
+            System.Diagnostics.Debugger.Break();
+#endif
+
             return builder
                  // Use a singleton cache
                  .WithSingletonCache()
                  .ConfigureServices(services =>
                  services
-                     .Configure<RazorViewEngineOptions>(options =>
+#if NETCORE2_1
+                    .Configure<RazorViewEngineOptions>(options =>
                      {
-                         options.FileProviders.Add(new PrisePluginEmbeddedFileProvider<T>(services.BuildServiceProvider().GetService(typeof(IPluginCache<T>)) as IPluginCache<T>));
-                         options.ViewLocationExpanders.Add(new PriseViewLocationExpander());
+                         options.FileProviders.Add(new PrisePluginViewsAssemblyFileProvider<T>(webRootPath));
                      })
-                     // Registers the change provider
-                     .AddSingleton<IPriseActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
-                     .AddSingleton<IActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
-                     // Registers the activator for controllers from plugin assemblies
-                     .Replace(ServiceDescriptor.Transient<IRazorPageActivator, PriseRazorPageActivator<T>>())
-                     .Replace(ServiceDescriptor.Transient<IControllerActivator, PriseControllersAsPluginActivator<T>>()))
+#endif
+#if NETCORE3_0
+                    .Configure<MvcRazorRuntimeCompilationOptions>(options =>
+                     {
+                         options.FileProviders.Add(new PrisePluginViewsAssemblyFileProvider<T>(webRootPath));
+                     })
+#endif
+                    // Registers the static Plugin Cache Accessor
+                    .AddSingleton<IPluginCacheAccessorBootstrapper<T>, StaticPluginCacheAccessorBootstrapper<T>>()
+                    // Registers the change provider
+                    .AddSingleton<IPriseActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
+                    .AddSingleton<IActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
+                    // Registers the activator for controllers from plugin assemblies
+                    .Replace(ServiceDescriptor.Transient<IControllerActivator, PriseControllersAsPluginActivator<T>>()))
                  // Makes sure controllers can be casted to the host's representation of ControllerBase
                  .WithHostType(typeof(ControllerBase))
                  .WithHostType(typeof(ITempDataDictionaryFactory))

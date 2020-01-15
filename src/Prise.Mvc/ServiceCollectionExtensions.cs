@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -28,12 +29,6 @@ namespace Prise.Mvc
         public static PluginLoadOptionsBuilder<T> AddPriseControllersAsPlugins<T>(this PluginLoadOptionsBuilder<T> builder, string webRootPath)
         {
             var actionDescriptorChangeProvider = new PriseActionDescriptorChangeProvider();
-#if NETCORE2_1
-            System.Diagnostics.Debugger.Break();
-#endif
-#if NETCORE3_0
-            System.Diagnostics.Debugger.Break();
-#endif
 
             return builder
                  // Use a singleton cache
@@ -59,8 +54,13 @@ namespace Prise.Mvc
                     .AddSingleton<IActionDescriptorChangeProvider>(actionDescriptorChangeProvider)
                     // Registers the activator for controllers from plugin assemblies
                     .Replace(ServiceDescriptor.Transient<IControllerActivator, PriseControllersAsPluginActivator<T>>()))
+#if NETCORE2_1
+                 // This is required in 2.1 because there is no AssemblyDependencyResolver
+                 .UsePluginContextAsDependencyPath()
+#endif
                  // Makes sure controllers can be casted to the host's representation of ControllerBase
                  .WithHostType(typeof(ControllerBase))
+                 // Makes sure the Microsoft.AspNetCore.Mvc.ViewFeatures assembly is loaded from the host
                  .WithHostType(typeof(ITempDataDictionaryFactory))
             ;
         }

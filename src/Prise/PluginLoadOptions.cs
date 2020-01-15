@@ -6,6 +6,7 @@ namespace Prise
 {
     public class PluginLoadOptions<T> : IPluginLoadOptions<T>
     {
+        private readonly IPluginLogger<T> logger;
         private readonly IAssemblyScanner<T> assemblyScanner;
         private readonly ISharedServicesProvider<T> sharedServicesProvider;
         private readonly IPluginTypesProvider<T> pluginTypesProvider;
@@ -24,6 +25,7 @@ namespace Prise
 
         // Use the ASP.NET Core DI system to inject these dependencies
         public PluginLoadOptions(
+            IPluginLogger<T> logger,
             IAssemblyScanner<T> assemblyScanner,
             ISharedServicesProvider<T> sharedServicesProvider,
             IPluginTypesProvider<T> pluginTypesProvider,
@@ -40,6 +42,7 @@ namespace Prise
             IPluginSelector<T> pluginSelector
             )
         {
+            this.logger = logger;
             this.assemblyScanner = assemblyScanner;
             this.sharedServicesProvider = sharedServicesProvider;
             this.pluginTypesProvider = pluginTypesProvider;
@@ -56,6 +59,7 @@ namespace Prise
             this.pluginSelector = pluginSelector;
         }
 
+        public IPluginLogger<T> Logger => this.logger;
         public IAssemblyScanner<T> AssemblyScanner => this.assemblyScanner;
         public ISharedServicesProvider<T> SharedServicesProvider => this.sharedServicesProvider;
         public IPluginTypesProvider<T> PluginTypesProvider => this.pluginTypesProvider;

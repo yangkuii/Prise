@@ -5,6 +5,7 @@ namespace Prise.Infrastructure
 {
     public interface IPluginLoadOptions<T> : IDisposable
     {
+        IPluginLogger<T> Logger { get; }
         IAssemblyScanner<T> AssemblyScanner { get; }
         IPluginAssemblyLoader<T> AssemblyLoader { get; }
         ISharedServicesProvider<T> SharedServicesProvider { get; }

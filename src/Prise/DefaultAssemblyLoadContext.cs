@@ -10,6 +10,7 @@ namespace Prise
 {
     public class DefaultAssemblyLoadContext<T> : InMemoryAssemblyLoadContext, IAssemblyLoadContext
     {
+        protected IPluginLogger<T> logger;
         protected IHostFrameworkProvider hostFrameworkProvider;
         protected IHostTypesProvider hostTypesProvider;
         protected IRemoteTypesProvider<T> remoteTypesProvider;
@@ -30,6 +31,7 @@ namespace Prise
         protected ConcurrentBag<string> loadedPlugins;
 
         public DefaultAssemblyLoadContext(
+            IPluginLogger<T> logger,
             IAssemblyLoadOptions<T> options,
             IHostFrameworkProvider hostFrameworkProvider,
             IHostTypesProvider hostTypesProvider,
@@ -42,6 +44,7 @@ namespace Prise
             INativeAssemblyUnloader nativeAssemblyUnloader,
             IAssemblyLoadStrategyProvider assemblyLoadStrategyProvider)
         {
+            this.logger = logger;
             this.options = options;
             this.hostFrameworkProvider = hostFrameworkProvider;
             this.hostTypesProvider = hostTypesProvider;
@@ -86,7 +89,7 @@ namespace Prise
 
             using (var pluginStream = LoadFileFromLocalDisk(pluginLoadContext.PluginAssemblyPath, pluginLoadContext.PluginAssemblyName))
             {
-                this.assemblyLoadStrategy = this.assemblyLoadStrategyProvider.ProvideAssemblyLoadStrategy(pluginLoadContext, this.pluginDependencyContext);
+                this.assemblyLoadStrategy = this.assemblyLoadStrategyProvider.ProvideAssemblyLoadStrategy(this.logger, pluginLoadContext, this.pluginDependencyContext);
 
                 return base.LoadFromStream(pluginStream); // ==> AssemblyLoadContext.LoadFromStream(Stream stream);
             }
@@ -107,7 +110,7 @@ namespace Prise
 
             using (var pluginStream = await LoadFileFromLocalDiskAsync(pluginLoadContext.PluginAssemblyPath, pluginLoadContext.PluginAssemblyName))
             {
-                this.assemblyLoadStrategy = this.assemblyLoadStrategyProvider.ProvideAssemblyLoadStrategy(pluginLoadContext, this.pluginDependencyContext);
+                this.assemblyLoadStrategy = this.assemblyLoadStrategyProvider.ProvideAssemblyLoadStrategy(this.logger, pluginLoadContext, this.pluginDependencyContext);
 
                 return base.LoadFromStream(pluginStream); // ==> AssemblyLoadContext.LoadFromStream(Stream stream);
             }
@@ -232,6 +235,8 @@ namespace Prise
             if (this.disposed || this.disposing)
                 return null;
 
+            this.logger.LoadReferenceAssembly(assemblyName);
+
             return assemblyLoadStrategy.LoadAssembly(
                     assemblyName,
                     LoadFromDependencyContext,
@@ -245,6 +250,8 @@ namespace Prise
             // This fixes the issue where the ALC is still alive and utilized in the host
             if (this.disposed || this.disposing)
                 return IntPtr.Zero;
+
+            this.logger.LoadUnmanagedDll(unmanagedDllName);
 
             IntPtr library = IntPtr.Zero;
 

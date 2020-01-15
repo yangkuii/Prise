@@ -10,6 +10,8 @@ namespace Prise
 {
     public class PluginLoadOptionsBuilder<T>
     {
+        internal IPluginLogger<T> logger;
+        internal Type loggerType;
         internal ServiceLifetime priseServiceLifetime;
         internal CacheOptions<IPluginCache<T>> cacheOptions;
         internal IAssemblyScanner<T> assemblyScanner;
@@ -70,6 +72,19 @@ namespace Prise
 
         internal PluginLoadOptionsBuilder()
         {
+        }
+
+        public PluginLoadOptionsBuilder<T> WithLogger(IPluginLogger<T> logger)
+        {
+            this.logger = logger;
+            return this;
+        }
+
+        public PluginLoadOptionsBuilder<T> WithLoggerType<TType>()
+            where TType : IPluginLogger<T>
+        {
+            this.loggerType = typeof(TType);
+            return this;
         }
 
         public PluginLoadOptionsBuilder<T> WithPluginPath(string path)
@@ -361,6 +376,12 @@ namespace Prise
             return this;
         }
 
+        public PluginLoadOptionsBuilder<T> UsePluginContextAsDependencyPath()
+        {
+            this.dependencyPathProviderType = typeof(PluginContextAsDependencyPathProvider<T>);
+            return this;
+        }
+
         public PluginLoadOptionsBuilder<T> WithProbingPath(string path)
         {
             var probingPathsProvider = this.probingPathsProvider as ProbingPathsProvider<T>;
@@ -466,6 +487,7 @@ namespace Prise
             if (String.IsNullOrEmpty(pluginPath))
                 pluginPath = Path.Join(GetLocalExecutionPath(), "Plugins");
 
+            this.loggerType = typeof(ConsolePluginLogger<T>);
             this.pluginPathProvider = new DefaultPluginPathProvider<T>(pluginPath);
             this.dependencyPathProvider = new DependencyPathProvider<T>(pluginPath);
             this.cacheOptions = CacheOptions<IPluginCache<T>>.ScopedPluginCache();
@@ -529,6 +551,7 @@ namespace Prise
 
             services
                 // Plugin-specific services
+                .RegisterTypeOrInstance<IPluginLogger<T>>(loggerType, logger, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IPluginPathProvider<T>>(pluginPathProviderType, pluginPathProvider, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IAssemblyScanner<T>>(assemblyScannerType, assemblyScanner, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IAssemblyScannerOptions<T>>(assemblyScannerOptionsType, assemblyScannerOptions, this.priseServiceLifetime)

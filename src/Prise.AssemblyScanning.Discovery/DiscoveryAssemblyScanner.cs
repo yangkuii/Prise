@@ -67,7 +67,7 @@ namespace Prise.AssemblyScanning.Discovery
             var assemblies = new List<DiscoveredAssembly>();
             foreach (var directoryPath in Directory.GetDirectories(startingPath))
             {
-                var files = searchPatterns.SelectMany(p => Directory.GetFiles(directoryPath, p, SearchOption.AllDirectories));
+                var files = searchPatterns.SelectMany(p => ExcludeRuntimesFolder(Directory.GetFiles(directoryPath, p, SearchOption.AllDirectories)));
                 foreach (var assemblyFilePath in files)
                 {
                     assemblies.Add(DiscoverAssembly(assemblyFilePath));
@@ -113,18 +113,26 @@ namespace Prise.AssemblyScanning.Discovery
             var mapName = fileInfo.Name;
             var mode = FileMode.Open;
             var access = MemoryMappedFileAccess.Read;
-            using (var file = MemoryMappedFile.CreateFromFile(assemblyPath, mode, mapName, length, access))
+            try
             {
-                using (var stream = file.CreateViewStream(0x0, length, access))
+                using (var file = MemoryMappedFile.CreateFromFile(assemblyPath, mode, mapName, length, access))
                 {
-                    var headers = new PEHeaders(stream);
-                    var start = (byte*)0;
-                    stream.SafeMemoryMappedViewHandle.AcquirePointer(ref start);
-                    var size = headers.MetadataSize;
-                    var reader = new MetadataReader(start + headers.MetadataStartOffset, size, default(MetadataReaderOptions), null);
-                    return new DiscoveredAssembly(assemblyPath, reader);
+                    using (var stream = file.CreateViewStream(0x0, length, access))
+                    {
+                        var headers = new PEHeaders(stream);
+                        var start = (byte*)0;
+                        stream.SafeMemoryMappedViewHandle.AcquirePointer(ref start);
+                        var size = headers.MetadataSize;
+                        var reader = new MetadataReader(start + headers.MetadataStartOffset, size, default(MetadataReaderOptions), null);
+                        return new DiscoveredAssembly(assemblyPath, reader);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
         }
 #endif
 

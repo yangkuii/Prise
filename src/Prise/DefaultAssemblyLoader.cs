@@ -7,6 +7,7 @@ namespace Prise
 {
     public class DefaultAssemblyLoader<T> : DisposableAssemblyUnLoader, IPluginAssemblyLoader<T>
     {
+        private readonly IPluginLogger<T> logger;
         private readonly IAssemblyLoadOptions<T> options;
         private readonly IHostFrameworkProvider hostFrameworkProvider;
         private readonly IHostTypesProvider hostTypesProvider;
@@ -20,6 +21,7 @@ namespace Prise
         private readonly IAssemblyLoadStrategyProvider assemblyLoadStrategyProvider;
 
         public DefaultAssemblyLoader(
+            IPluginLogger<T> logger,
             IAssemblyLoadOptions<T> options,
             IHostFrameworkProvider hostFrameworkProvider,
             IHostTypesProvider hostTypesProvider,
@@ -32,6 +34,7 @@ namespace Prise
             INativeAssemblyUnloader nativeAssemblyUnloader,
             IAssemblyLoadStrategyProvider assemblyLoadStrategyProvider) : base()
         {
+            this.logger = logger;
             this.options = options;
             this.hostFrameworkProvider = hostFrameworkProvider;
             this.hostTypesProvider = hostTypesProvider;
@@ -49,6 +52,7 @@ namespace Prise
         {
             var pluginAssemblyName = Path.GetFileNameWithoutExtension(pluginLoadContext.PluginAssemblyName);
             var loadContext = new DefaultAssemblyLoadContext<T>(
+                this.logger,
                 this.options,
                 this.hostFrameworkProvider,
                 this.hostTypesProvider,
@@ -72,6 +76,7 @@ namespace Prise
         {
             var pluginAssemblyName = Path.GetFileNameWithoutExtension(pluginLoadContext.PluginAssemblyName);
             var loadContext = new DefaultAssemblyLoadContext<T>(
+                this.logger,
                 this.options,
                 this.hostFrameworkProvider,
                 this.hostTypesProvider,

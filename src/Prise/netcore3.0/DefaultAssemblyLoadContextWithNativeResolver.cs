@@ -12,6 +12,7 @@ namespace Prise
         protected AssemblyDependencyResolver resolver;
 
         public DefaultAssemblyLoadContextWithNativeResolver(
+            IPluginLogger<T> logger,
             IAssemblyLoadOptions<T> options,
             IHostFrameworkProvider hostFrameworkProvider,
             IHostTypesProvider hostTypesProvider,
@@ -24,6 +25,7 @@ namespace Prise
             INativeAssemblyUnloader nativeAssemblyUnloader,
             IAssemblyLoadStrategyProvider assemblyLoadStrategyProvider
         ) : base(
+                logger,
                 options,
                 hostFrameworkProvider,
                 hostTypesProvider,

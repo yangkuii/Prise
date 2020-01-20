@@ -487,6 +487,7 @@ namespace Prise
             if (String.IsNullOrEmpty(pluginPath))
                 pluginPath = Path.Join(GetLocalExecutionPath(), "Plugins");
 
+            this.priseServiceLifetime = ServiceLifetime.Scoped;
             this.loggerType = typeof(ConsolePluginLogger<T>);
             this.pluginPathProvider = new DefaultPluginPathProvider<T>(pluginPath);
             this.dependencyPathProvider = new DependencyPathProvider<T>(pluginPath);

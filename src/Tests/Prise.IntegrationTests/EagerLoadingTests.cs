@@ -299,5 +299,33 @@ namespace Prise.IntegrationTests
             // Assert (50 * 2 + 10% discount) + (40 * 2 + 10% discount)
             Assert.Equal(198, result.Result);
         }
+
+        [Fact]
+        public async Task PluginC_multi_async_Works()
+        {
+            // Arrange
+            var payload = new CalculationRequestMultiModel
+            {
+                Calculations = new[]
+                {
+                    new CalculationRequestModel
+                    {
+                        A = 50,
+                        B = 2
+                    },
+                    new CalculationRequestModel
+                    {
+                        A = 40,
+                        B = 2
+                    }
+                }
+            };
+
+            //Act
+            var result = await Post<CalculationResponseModel>(_client, "PluginC", "/eager/multi-async", payload);
+
+            // Assert (50 * 2 + 10% discount) + (40 * 2 + 10% discount)
+            Assert.Equal(198, result.Result);
+        }
     }
 }

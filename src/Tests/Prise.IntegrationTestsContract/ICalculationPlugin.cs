@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Prise.IntegrationTestsContract
 {
@@ -11,5 +12,6 @@ namespace Prise.IntegrationTestsContract
         decimal CalculateComplex(CalculationContext context);
         CalculationResult CalculateComplexResult(CalculationContext context);
         ComplexCalculationResult CalculateMutiple(ComplexCalculationContext context);
+        Task<ComplexCalculationResult> CalculateMutipleAsync(ComplexCalculationContext context);
     }
 }

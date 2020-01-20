@@ -1,6 +1,8 @@
 var target = Argument("target", "default");
 var configuration = Argument("configuration", "Debug");
-var plugins = new[] { "PluginA", "PluginB", "PluginC" };
+var plugins = new[] { "PluginA", "PluginB", "PluginC", "PluginCFromNetwork" };
+var defaultPlugins = new[] { "PluginA", "PluginB", "PluginC" };
+var networkPlugins = new[] { "PluginCFromNetwork" };
 
 private void CleanProject(string projectDirectory){
     var projectFile = $"IntegrationTestsPlugins/{projectDirectory}/{projectDirectory}.csproj";
@@ -69,12 +71,17 @@ Task("copy-to-testhost")
   .IsDependentOn("publish")
   .Does(() =>
   {
-    foreach (var plugin in plugins)
+    foreach (var plugin in defaultPlugins)
     {
       CopyDirectory($"publish/{plugin}", $"Prise.IntegrationTests/bin/debug/netcoreapp2.1/Plugins/{plugin}");
       CopyDirectory($"publish/{plugin}", $"Prise.IntegrationTestsHost/bin/debug/netcoreapp2.1/Plugins/{plugin}");
       CopyDirectory($"publish/{plugin}", $"Prise.IntegrationTests/bin/debug/netcoreapp3.0/Plugins/{plugin}");
       CopyDirectory($"publish/{plugin}", $"Prise.IntegrationTestsHost/bin/debug/netcoreapp3.0/Plugins/{plugin}");
+    }
+
+    foreach (var plugin in networkPlugins)
+    {
+      CopyDirectory($"publish/{plugin}", $"Prise.IntegrationTestsHost/Plugins/{plugin}");
     }
   });
 

@@ -11,6 +11,8 @@ using Prise.IntegrationTestsContract;
 using Prise.IntegrationTestsHost.Services;
 using Prise.IntegrationTestsHost.Custom;
 using System;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 
 namespace Prise.IntegrationTestsHost
 {
@@ -26,6 +28,7 @@ namespace Prise.IntegrationTestsHost
         public void ConfigureServices(IServiceCollection services)
         {
             ConfigureTargetFramework(services);
+            services.AddHttpClient(); // Required for the INetworkCalculationPlugin
             services.AddHttpContextAccessor();
 
             var cla = services.BuildServiceProvider().GetRequiredService<ICommandLineArguments>();
@@ -44,15 +47,32 @@ namespace Prise.IntegrationTestsHost
 
         private IServiceCollection AddPriseWithContextBasedPluginLoading(IServiceCollection services)
         {
+            var localServices = services.BuildServiceProvider();
             // This will look for a custom plugin based on the context
-            return services.AddPrise<ICalculationPlugin>(options =>
-                 options
-                     .WithDefaultOptions()
-                     .IgnorePlatformInconsistencies()
-                     .WithPluginPathProvider<ContextPluginPathProvider<ICalculationPlugin>>()
-                     .WithPluginAssemblyNameProvider<ContextPluginAssemblyNameProvider<ICalculationPlugin>>()
-                     .WithHostFrameworkProvider<AppHostFrameworkProvider>()
-             );
+            return services
+                // Registers the default ICalculationPlugin
+                .AddPrise<ICalculationPlugin>(options =>
+                     options
+                        .WithDefaultOptions()
+                        .IgnorePlatformInconsistencies()
+                        .WithPluginPathProvider<ContextPluginPathProvider<ICalculationPlugin>>()
+                        .WithPluginAssemblyNameProvider<ContextPluginAssemblyNameProvider<ICalculationPlugin>>()
+                        .WithHostFrameworkProvider<AppHostFrameworkProvider>()
+                 )
+
+                // Registers the plugin that will be loaded over the network
+                .AddPrise<INetworkCalculationPlugin>(options =>
+                     options
+                        .WithDefaultOptions()
+                        .WithNetworkAssemblyLoader<NetworkPluginProvider>()
+                        .WithPluginAssemblyNameProvider<NetworkPluginProvider>()
+                        .WithHostFrameworkProvider<AppHostFrameworkProvider>()
+                        .ConfigureSharedServices(
+                            sharedServices =>
+                                sharedServices
+                                .AddSingleton(Configuration)
+                            )
+                 );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,6 +91,26 @@ namespace Prise.IntegrationTestsHost
             app.UseHttpsRedirection();
 
             ConfigureTargetFramework(app);
+
+            var provider = new FileExtensionContentTypeProvider();
+            // Add new mappings
+            provider.Mappings[".dll"] = "application/x-msdownload";
+            var test = Directory.GetCurrentDirectory();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true,
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Plugins")),
+                RequestPath = "/Plugins",
+                ContentTypeProvider = provider
+            });
+
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Plugins")),
+                RequestPath = "/Plugins"
+            });
         }
     }
 }

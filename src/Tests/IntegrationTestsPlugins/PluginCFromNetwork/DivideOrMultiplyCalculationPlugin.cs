@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using Prise.IntegrationTestsContract;
-using PluginC.Calculations;
+using PluginCFromNetwork.Calculations;
 using Prise.Plugin;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
-namespace PluginC
+namespace PluginCFromNetwork
 {
-    // This plugin will Divide or Multiple, who knows, it's always a guess.
-    // The decision is made in a service, which dependend a discount from a third party dependency that no other plugin shares
-    [Plugin(PluginType = typeof(ICalculationPlugin))]
-    public class DivideOrMultiplyCalculationPlugin : ICalculationPlugin
+    // This plugin will be loaded from the network
+    [Plugin(PluginType = typeof(INetworkCalculationPlugin))]
+    public class DivideOrMultiplyCalculationPlugin : INetworkCalculationPlugin
     {
         public string Name => nameof(DivideOrMultiplyCalculationPlugin);
 
@@ -67,9 +68,18 @@ namespace PluginC
         }
 
         [PluginFactory]
-        public static ICalculationPlugin ThisNameDoesNotMatterFactoryMethod(IServiceProvider serviceProvider)
+        public static INetworkCalculationPlugin ThisNameDoesNotMatterFactoryMethod(IServiceProvider serviceProvider)
         {
-            return new DivideOrMultiplyCalculationPlugin((ICanCalculate)serviceProvider.GetService(typeof(ICanCalculate)));
+            var config = serviceProvider.GetRequiredService<IConfiguration>();
+            var serviceConfig = config["DivideOrMultiply"];
+
+            // Since multiple ICanCalculate services are registered in the DivideOrMultiplyCalculationBootstrapper, multiple can be resolved
+            var services = serviceProvider.GetServices<ICanCalculate>();
+
+            // Choose the correct service based on the name
+            var serviceToUse = services.First(s => s.ServiceName == serviceConfig);
+
+            return new DivideOrMultiplyCalculationPlugin(serviceToUse);
         }
     }
 }

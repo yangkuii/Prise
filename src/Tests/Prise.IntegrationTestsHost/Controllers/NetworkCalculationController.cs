@@ -1,20 +1,21 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
-using Prise.IntegrationTestsHost.Models;
 using Prise.IntegrationTestsContract;
-using System.Threading.Tasks;
+using Prise.IntegrationTestsHost.Models;
 
 namespace Prise.IntegrationTestsHost.Controllers
 {
     [ApiController]
-    [Route("eager")]
-    public class EagerCalculationController : CalculationControllerBase
+    [Route("network")]
+    public class NetworkCalculationController : CalculationControllerBase
     {
         private readonly ILogger<EagerCalculationController> _logger;
 
-        public EagerCalculationController(ILogger<EagerCalculationController> logger, ICalculationPlugin plugin)
+        public NetworkCalculationController(ILogger<EagerCalculationController> logger, INetworkCalculationPlugin plugin)
         {
             _logger = logger;
             base.SetPlugin(plugin);

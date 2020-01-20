@@ -18,7 +18,8 @@ namespace Prise.IntegrationTests
             _factory = factory;
             _client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
-                AllowAutoRedirect = false
+                AllowAutoRedirect = false,
+                BaseAddress = new Uri("https://localhost:5001")
             });
             // Run tests locally
             //_client = new HttpClient();

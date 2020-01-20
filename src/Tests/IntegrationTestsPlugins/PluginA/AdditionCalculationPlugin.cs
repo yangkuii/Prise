@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Prise.IntegrationTestsContract;
 using Prise.Plugin;
 
@@ -41,6 +42,19 @@ namespace PluginA
         {
             var results = new List<CalculationResult>();
             results.AddRange(context.Calculations.Select(c => new CalculationResult { Result = c.A + c.B }));
+            return new ComplexCalculationResult
+            {
+                Results = results.ToArray()
+            };
+        }
+
+        public async Task<ComplexCalculationResult> CalculateMutipleAsync(ComplexCalculationContext context)
+        {
+            var results = new List<CalculationResult>();
+            results.AddRange(context.Calculations.Select(c => new CalculationResult { Result = c.A + c.B }));
+
+            await Task.Delay(2500);
+
             return new ComplexCalculationResult
             {
                 Results = results.ToArray()

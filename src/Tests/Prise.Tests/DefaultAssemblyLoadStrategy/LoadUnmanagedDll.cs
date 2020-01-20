@@ -16,9 +16,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.FromValue(someAssemblyName.Name, false));
             var loadFromRemote = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.Proceed());
             var loadFromAppDomain = CreateLookupFunction<string, IntPtr>((c, a) => ValueOrProceed<IntPtr>.FromValue(IntPtr.Zero, false));
@@ -37,9 +38,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.Proceed());
             var loadFromRemote = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.Proceed());
             var loadFromAppDomain = CreateLookupFunction<string, IntPtr>((c, a) => ValueOrProceed<IntPtr>.FromValue(new IntPtr(100), false));
@@ -58,9 +60,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.Proceed());
             var loadFromRemote = CreateLookupFunction<string, string>((c, a) => ValueOrProceed<string>.FromValue(someAssemblyName.Name, false));
             var loadFromAppDomain = CreateLookupFunction<string, IntPtr>((c, a) => ValueOrProceed<IntPtr>.Proceed());

@@ -12,6 +12,7 @@ namespace Prise.Tests
         protected readonly Dictionary<string, Mock> moqs = new Dictionary<string, Mock>();
 
         protected T CreateFixture<T>() where T : class => this.fixture.Create<T>();
+        protected T LooseMock<T>() where T : class => AddToMoqs(new Mock<T>(MockBehavior.Loose)).Object;
         protected T Mock<T>() where T : class => AddToMoqs(this.moq.Create<T>()).Object;
         protected Mock<T> Arrange<T>() where T : class => GetOrAdd<T>();
         protected void Verify() => this.moq.VerifyAll();

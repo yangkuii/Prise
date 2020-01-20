@@ -12,9 +12,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
         public void Returns_Null_For_Empty_AssemblyName()
         {
             // Arrange
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var emptyAssemblyname = new AssemblyName();
 
             // Act, Assert
@@ -25,15 +26,20 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
         public void Returns_Null_When_AssemblyName_NotFound()
         {
             // Arrange
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var assemblyname = new AssemblyName(this.CreateFixture<string>());
             var loadFromDependencyContext = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromRemote = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromAppDomain = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
+
             this.Arrange<IPluginDependencyContext>()
                 .Setup(p => p.HostDependencies).Returns(Enumerable.Empty<HostDependency>());
+
+            this.Arrange<IPluginDependencyContext>()
+               .Setup(p => p.RemoteDependencies).Returns(Enumerable.Empty<RemoteDependency>());
 
             // Act, Assert
             Assert.Null(sut.LoadAssembly(assemblyname, loadFromDependencyContext, loadFromRemote, loadFromAppDomain));
@@ -45,9 +51,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromRemote = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromAppDomain = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.FromValue(someAssembly, false));
@@ -69,9 +76,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromRemote = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromAppDomain = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
@@ -94,15 +102,19 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.FromValue(someAssembly, false));
             var loadFromRemote = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromAppDomain = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
 
             this.Arrange<IPluginDependencyContext>()
                 .Setup(p => p.HostDependencies).Returns(Enumerable.Empty<HostDependency>());
+
+            this.Arrange<IPluginDependencyContext>()
+               .Setup(p => p.RemoteDependencies).Returns(Enumerable.Empty<RemoteDependency>());
 
             // Act, Assert
             Assert.Equal(someAssembly, sut.LoadAssembly(someAssemblyName, loadFromDependencyContext, loadFromRemote, loadFromAppDomain));
@@ -114,9 +126,10 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             // Arrange
             var someAssembly = GetRealAssembly();
             var someAssemblyName = someAssembly.GetName();
+            var pluginLogger = this.LooseMock<IPluginLogger>();
             var pluginLoadContext = this.Mock<IPluginLoadContext>();
             var pluginDependencyContext = this.Mock<IPluginDependencyContext>();
-            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLoadContext, pluginDependencyContext);
+            var sut = new Prise.DefaultAssemblyLoadStrategy(pluginLogger, pluginLoadContext, pluginDependencyContext);
             var loadFromDependencyContext = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
             var loadFromRemote = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.FromValue(someAssembly, false));
             var loadFromAppDomain = CreateLookupFunction((c, a) => ValueOrProceed<Assembly>.Proceed());
@@ -124,9 +137,11 @@ namespace Prise.Tests.DefaultAssemblyLoadStrategy
             this.Arrange<IPluginDependencyContext>()
                 .Setup(p => p.HostDependencies).Returns(Enumerable.Empty<HostDependency>());
 
+            this.Arrange<IPluginDependencyContext>()
+               .Setup(p => p.RemoteDependencies).Returns(Enumerable.Empty<RemoteDependency>());
+
             // Act, Assert
             Assert.Equal(someAssembly, sut.LoadAssembly(someAssemblyName, loadFromDependencyContext, loadFromRemote, loadFromAppDomain));
         }
-
-       }
+    }
 }

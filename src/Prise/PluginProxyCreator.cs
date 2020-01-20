@@ -24,8 +24,8 @@ namespace Prise
         public IPluginBootstrapper CreateBootstrapperProxy(object remoteBootstrapper) =>
             CreateProxy<IPluginBootstrapper>(remoteBootstrapper, new PassthroughParameterConverter(), new PassthroughResultConverter());
 
-        public T CreatePluginProxy(object remoteObject, IPluginLoadOptions<T> options) =>
-            CreateProxy<T>(remoteObject, options.ParameterConverter, options.ResultConverter);
+        public T CreatePluginProxy(object remoteObject, IParameterConverter parameterConverter, IResultConverter resultConverter) =>
+            CreateProxy<T>(remoteObject, parameterConverter, resultConverter);
 
         protected virtual void Dispose(bool disposing)
         {

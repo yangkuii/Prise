@@ -45,9 +45,11 @@ namespace Prise
 
             if (factoryMethod == null)
                 throw new PrisePluginException($@"Plugins must either provide a default parameterless constructor or implement a static factory method.
-                    Like; 'public static {pluginType.Name} CreatePlugin(IServiceProvider serviceProvider)");
+                    Example; 'public static {pluginType.Name} CreatePlugin(IServiceProvider serviceProvider)");
 
             var sharedServices = this.sharedServicesProvider.ProvideSharedServices();
+
+            // TODO Loop over shared services and register remote types
 
             if (bootstrapper != null)
                 sharedServices = bootstrapper.Bootstrap(sharedServices);

@@ -140,7 +140,7 @@ namespace Prise
 
                 pluginLoadOptions.Logger.RemoteInstanceCreated(remoteObject);
 
-                pluginProxy = pluginLoadOptions.ProxyCreator.CreatePluginProxy(remoteObject, pluginLoadOptions);
+                pluginProxy = pluginLoadOptions.ProxyCreator.CreatePluginProxy(remoteObject, pluginLoadOptions.ParameterConverter, pluginLoadOptions.ResultConverter);
                 pluginLoadOptions.Logger.RemoteProxyCreated(pluginProxy);
 
                 this.disposables.Add(pluginProxy as IDisposable);

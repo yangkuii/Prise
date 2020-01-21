@@ -20,7 +20,7 @@ namespace Prise.Proxy
                 var localType = targetMethod.ReturnType;
                 var remoteMethod = FindMethodOnRemoteObject(targetMethod, remoteObject);
                 if (remoteMethod == null)
-                    throw new PriseProxyException($"Target method {targetMethod.Name} is not found on Plugin Type {remoteObject.GetType().Name}.");
+                    throw new PriseProxyException($"Target method {targetMethod.Name} is not found on Proxy Type {remoteObject.GetType().Name}.");
 
                 var result = remoteMethod.Invoke(remoteObject, SerializeParameters(remoteMethod, args));
 
@@ -72,7 +72,7 @@ namespace Prise.Proxy
 
             var targetMethods = targetObject.GetType().GetMethods().Where(targetMethod => targetMethod.Name == callingMethod.Name);
             if (!targetMethods.Any())
-                throw new PriseProxyException($"Target method {callingMethod.Name} is not found on Plugin Type {targetObject.GetType().Name}.");
+                throw new PriseProxyException($"Target method {callingMethod.Name} is not found on Proxy Type {targetObject.GetType().Name}.");
 
             if (targetMethods.Count() == 1)
                 return targetMethods.First();
@@ -101,7 +101,7 @@ namespace Prise.Proxy
             );
 
             if (targetMethods.Count() > 1)
-                throw new PriseProxyException($"Target method {callingMethod.Name} is found multiple times on Plugin Type {targetObject.GetType().Name}.");
+                throw new PriseProxyException($"Target method {callingMethod.Name} is found multiple times on Proxy Type {targetObject.GetType().Name}.");
 
             return targetMethods.First();
         }

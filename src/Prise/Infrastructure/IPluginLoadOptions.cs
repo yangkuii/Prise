@@ -1,3 +1,4 @@
+using Prise.Proxy;
 using Prise.AssemblyScanning;
 using System;
 
@@ -14,7 +15,7 @@ namespace Prise.Infrastructure
         IRemotePluginActivator Activator { get; }
         IResultConverter ResultConverter { get; }
         IParameterConverter ParameterConverter { get; }
-        IProxyCreator<T> ProxyCreator { get; }
+        IPluginProxyCreator<T> ProxyCreator { get; }
         IHostTypesProvider HostTypesProvider { get; }
         IRemoteTypesProvider<T> RemoteTypesProvider { get; }
         IRuntimePlatformContext RuntimePlatformContext { get; }

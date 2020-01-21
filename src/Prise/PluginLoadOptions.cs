@@ -1,6 +1,7 @@
 using System;
 using Prise.AssemblyScanning;
 using Prise.Infrastructure;
+using Prise.Proxy;
 
 namespace Prise
 {
@@ -15,7 +16,7 @@ namespace Prise
         private readonly IResultConverter resultConverter;
         private readonly IParameterConverter parameterConverter;
         private readonly IPluginAssemblyLoader<T> assemblyLoader;
-        private readonly IProxyCreator<T> proxyCreator;
+        private readonly IPluginProxyCreator<T> proxyCreator;
         private readonly IHostTypesProvider hostTypesProvider;
         private readonly IRemoteTypesProvider<T> remoteTypesProvider;
         private readonly IRuntimePlatformContext runtimePlatformContext;
@@ -34,7 +35,7 @@ namespace Prise
             IParameterConverter parameterConverter,
             IResultConverter resultConverter,
             IPluginAssemblyLoader<T> assemblyLoader,
-            IProxyCreator<T> proxyCreator,
+            IPluginProxyCreator<T> proxyCreator,
             IHostTypesProvider hostTypesProvider,
             IRemoteTypesProvider<T> remoteTypesProvider,
             IRuntimePlatformContext runtimePlatformContext,
@@ -68,7 +69,7 @@ namespace Prise
         public IResultConverter ResultConverter => this.resultConverter;
         public IParameterConverter ParameterConverter => this.parameterConverter;
         public IPluginAssemblyLoader<T> AssemblyLoader => this.assemblyLoader;
-        public IProxyCreator<T> ProxyCreator => this.proxyCreator;
+        public IPluginProxyCreator<T> ProxyCreator => this.proxyCreator;
         public IHostTypesProvider HostTypesProvider => this.hostTypesProvider;
         public IRemoteTypesProvider<T> RemoteTypesProvider => this.remoteTypesProvider;
         public IRuntimePlatformContext RuntimePlatformContext => this.runtimePlatformContext;

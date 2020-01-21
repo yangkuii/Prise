@@ -1,6 +1,6 @@
 using System;
 
-namespace Prise
+namespace Prise.Proxy
 {
     public class PassthroughResultConverter : ResultConverter
     {

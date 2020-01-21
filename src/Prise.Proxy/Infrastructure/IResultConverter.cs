@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace Prise.Infrastructure
+namespace Prise.Proxy
 {
     public interface IResultConverter : IDisposable
     {

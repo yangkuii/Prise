@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Prise.Infrastructure;
+using Prise.Proxy;
 
 namespace Prise
 {

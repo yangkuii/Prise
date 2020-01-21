@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace Prise.Infrastructure
+namespace Prise.Proxy
 {
     public interface IParameterConverter : IDisposable
     {

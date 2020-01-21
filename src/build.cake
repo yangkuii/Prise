@@ -3,6 +3,7 @@ var configuration = Argument("configuration", "Release");
 var apikey = Argument("apikey", "");
 var outputDir = "../dist";
 var priseVersion = "1.5.0";
+var proxyVersion = "1.5.0";
 var pluginVersion = "1.5.0";
 var mvcVersion = "1.5.0";
 var assemblyDiscoveryVersion = "1.5.0";
@@ -38,6 +39,8 @@ Task("build").Does( () =>
     DotNetCoreBuild("Prise.MVC/Prise.MVC.csproj", netcoreapp3);
     DotNetCoreBuild("Prise.Plugin/Prise.Plugin.csproj", netstandard2);
     DotNetCoreBuild("Prise.Plugin/Prise.Plugin.csproj", netstandard2_1);
+    DotNetCoreBuild("Prise.Proxy/Prise.Proxy.csproj", netcoreapp2);
+    DotNetCoreBuild("Prise.Proxy/Prise.Proxy.csproj", netcoreapp3);
     DotNetCoreBuild("Prise/Prise.csproj", netcoreapp2);
     DotNetCoreBuild("Prise/Prise.csproj", netcoreapp3);
 });
@@ -69,6 +72,7 @@ Task("publish")
     DotNetCorePack("Prise.AssemblyScanning.Discovery/Prise.AssemblyScanning.Discovery.csproj", GetPackSettings(assemblyDiscoveryVersion));
     DotNetCorePack("Prise.MVC/Prise.MVC.csproj", GetPackSettings(mvcVersion));
     DotNetCorePack("Prise.Plugin/Prise.Plugin.csproj", GetPackSettings(pluginVersion));
+    DotNetCorePack("Prise.Proxy/Prise.Proxy.csproj", GetPackSettings(proxyVersion));
     DotNetCorePack("Prise/Prise.csproj", GetPackSettings(priseVersion));
   });
 
@@ -82,6 +86,14 @@ Task("push")
         Source = nugetSource,
         ApiKey = apikey
     };
+    try
+    {
+      DotNetCoreNuGetPush(outputDir + "/Prise.Proxy." + proxyVersion +  ".nupkg", settings); 
+    }
+    catch(Exception ex)
+    {
+      Console.WriteLine(ex.Message);
+    }
     try
     {
       DotNetCoreNuGetPush(outputDir + "/Prise." + priseVersion +  ".nupkg", settings); 

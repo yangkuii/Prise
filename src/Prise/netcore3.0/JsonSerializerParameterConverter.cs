@@ -1,6 +1,6 @@
-using Prise.Infrastructure;
 using System;
 using System.Text.Json;
+using Prise.Proxy;
 
 namespace Prise
 {

@@ -1,7 +1,6 @@
 using System;
-using Prise.Infrastructure;
 
-namespace Prise
+namespace Prise.Proxy
 {
     public class PassthroughParameterConverter : IParameterConverter
     {

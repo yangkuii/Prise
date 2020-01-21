@@ -1,30 +1,30 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Prise.Infrastructure;
+using Prise.Proxy.Exceptions;
 
-namespace Prise
+namespace Prise.Proxy
 {
-    public class PluginProxy<T> : DispatchProxy, IDisposable
+    public class PriseProxy<T> : DispatchProxy, IDisposable
     {
         private IParameterConverter parameterConverter;
         private IResultConverter resultConverter;
         private object remoteObject;
         protected bool disposed = false;
 
-        protected override object Invoke(MethodInfo callingMethod, object[] args)
+        protected override object Invoke(MethodInfo targetMethod, object[] args)
         {
             try
             {
-                var localType = callingMethod.ReturnType;
-                var targetMethod = FindMethodOnRemoteObject(callingMethod, remoteObject);
-                if (targetMethod == null)
-                    throw new PrisePluginException($"Target method {callingMethod.Name} is not found on Plugin Type {remoteObject.GetType().Name}.");
+                var localType = targetMethod.ReturnType;
+                var remoteMethod = FindMethodOnRemoteObject(targetMethod, remoteObject);
+                if (remoteMethod == null)
+                    throw new PriseProxyException($"Target method {targetMethod.Name} is not found on Plugin Type {remoteObject.GetType().Name}.");
 
-                var result = targetMethod.Invoke(remoteObject, SerializeParameters(targetMethod, args));
+                var result = remoteMethod.Invoke(remoteObject, SerializeParameters(remoteMethod, args));
 
-                var remoteType = targetMethod.ReturnType;
+                var remoteType = remoteMethod.ReturnType;
                 if (remoteType.BaseType == typeof(System.Threading.Tasks.Task))
                 {
                     return this.resultConverter.ConvertToLocalTypeAsync(localType, remoteType, result as System.Threading.Tasks.Task);
@@ -37,30 +37,30 @@ namespace Prise
             }
         }
 
-        public static object Create() => Create<T, PluginProxy<T>>();
+        public static object Create() => Create<T, PriseProxy<T>>();
 
-        internal PluginProxy<T> SetRemoteObject(object remoteObject)
+        internal PriseProxy<T> SetRemoteObject(object remoteObject)
         {
             if (remoteObject == null)
-                throw new PrisePluginException($"Remote object for Proxy<{typeof(T).Name}> was null");
+                throw new PriseProxyException($"Remote object for Proxy<{typeof(T).Name}> was null");
 
             this.remoteObject = remoteObject;
             return this;
         }
 
-        internal PluginProxy<T> SetParameterConverter(IParameterConverter parameterConverter)
+        internal PriseProxy<T> SetParameterConverter(IParameterConverter parameterConverter)
         {
             if (parameterConverter == null)
-                throw new PrisePluginException($"IParameterConverter for Proxy<{typeof(T).Name}> was null");
+                throw new PriseProxyException($"IParameterConverter for Proxy<{typeof(T).Name}> was null");
 
             this.parameterConverter = parameterConverter;
             return this;
         }
 
-        internal PluginProxy<T> SetResultConverter(IResultConverter resultConverter)
+        internal PriseProxy<T> SetResultConverter(IResultConverter resultConverter)
         {
             if (resultConverter == null)
-                throw new PrisePluginException($"IResultConverter for Proxy<{typeof(T).Name}> was null");
+                throw new PriseProxyException($"IResultConverter for Proxy<{typeof(T).Name}> was null");
 
             this.resultConverter = resultConverter;
             return this;
@@ -71,8 +71,8 @@ namespace Prise
             bool isNameCorrect(MethodInfo targetMethod) => targetMethod.Name == callingMethod.Name;
 
             var targetMethods = targetObject.GetType().GetMethods().Where(targetMethod => targetMethod.Name == callingMethod.Name);
-            if (targetMethods.Count() == 0)
-                throw new PrisePluginException($"Target method {callingMethod.Name} is not found on Plugin Type {targetObject.GetType().Name}.");
+            if (!targetMethods.Any())
+                throw new PriseProxyException($"Target method {callingMethod.Name} is not found on Plugin Type {targetObject.GetType().Name}.");
 
             if (targetMethods.Count() == 1)
                 return targetMethods.First();
@@ -101,7 +101,7 @@ namespace Prise
             );
 
             if (targetMethods.Count() > 1)
-                throw new PrisePluginException($"Target method {callingMethod.Name} is found multiple times on Plugin Type {targetObject.GetType().Name}.");
+                throw new PriseProxyException($"Target method {callingMethod.Name} is found multiple times on Plugin Type {targetObject.GetType().Name}.");
 
             return targetMethods.First();
         }

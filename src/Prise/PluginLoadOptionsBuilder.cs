@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Prise.AssemblyScanning;
 using Prise.Infrastructure;
+using Prise.Proxy;
 
 namespace Prise
 {
@@ -30,7 +30,7 @@ namespace Prise
         internal IPluginTypesProvider<T> pluginTypesProvider;
         internal Type pluginTypesProviderType;
         internal Type activatorType;
-        internal IProxyCreator<T> proxyCreator;
+        internal IPluginProxyCreator<T> proxyCreator;
         internal Type proxyCreatorType;
         internal IResultConverter resultConverter;
         internal Type resultConverterType;
@@ -131,14 +131,14 @@ namespace Prise
             return this;
         }
 
-        public PluginLoadOptionsBuilder<T> WithProxyCreator(IProxyCreator<T> proxyCreator)
+        public PluginLoadOptionsBuilder<T> WithProxyCreator(IPluginProxyCreator<T> proxyCreator)
         {
             this.proxyCreator = proxyCreator;
             return this;
         }
 
         public PluginLoadOptionsBuilder<T> WithProxyCreator<TType>()
-            where TType : IProxyCreator<T>
+            where TType : IPluginProxyCreator<T>
         {
             this.proxyCreatorType = typeof(TType);
             return this;
@@ -558,7 +558,7 @@ namespace Prise
                 .RegisterTypeOrInstance<IAssemblyScannerOptions<T>>(assemblyScannerOptionsType, assemblyScannerOptions, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IPluginTypesProvider<T>>(pluginTypesProviderType, pluginTypesProvider, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IPluginActivationContextProvider<T>>(pluginActivationContextProviderType, pluginActivationContextProvider, this.priseServiceLifetime)
-                .RegisterTypeOrInstance<IProxyCreator<T>>(proxyCreatorType, proxyCreator, this.priseServiceLifetime)
+                .RegisterTypeOrInstance<IPluginProxyCreator<T>>(proxyCreatorType, proxyCreator, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<ISharedServicesProvider<T>>(sharedServicesProviderType, sharedServicesProvider, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IPluginAssemblyNameProvider<T>>(pluginAssemblyNameProviderType, pluginAssemblyNameProvider, this.priseServiceLifetime)
                 .RegisterTypeOrInstance<IPluginAssemblyLoader<T>>(assemblyLoaderType, assemblyLoader, this.priseServiceLifetime)

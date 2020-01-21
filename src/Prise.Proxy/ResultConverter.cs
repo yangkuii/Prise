@@ -2,9 +2,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Prise.Infrastructure;
 
-namespace Prise
+namespace Prise.Proxy
 {
     public abstract class ResultConverter : IResultConverter
     {

@@ -1,17 +1,18 @@
+#if NETCORE2_1
 using System;
-using System.Text.Json;
+using Newtonsoft.Json;
 using Prise.Proxy;
 
 namespace Prise
 {
-    public class JsonSerializerParameterConverter : IParameterConverter
+    public class NewtonsoftParameterConverter : IParameterConverter
     {
         protected bool disposed = false;
 
         public object ConvertToRemoteType(Type localType, object value)
         {
-            var json = JsonSerializer.Serialize(value);
-            return JsonSerializer.Deserialize(json, localType);
+            var json = JsonConvert.SerializeObject(value);
+            return JsonConvert.DeserializeObject(json, localType);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -30,3 +31,4 @@ namespace Prise
         }
     }
 }
+#endif

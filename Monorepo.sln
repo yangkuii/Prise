@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PluginCFromNetwork", "src\T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prise.Proxy", "src\Prise.Proxy\Prise.Proxy.csproj", "{33849B5D-B3AB-4A65-B370-80366E08DBC5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prise.PluginBridge", "src\Prise.PluginBridge\Prise.PluginBridge.csproj", "{2329497F-1A66-429C-8DF2-E30FCB993697}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -227,6 +229,18 @@ Global
 		{33849B5D-B3AB-4A65-B370-80366E08DBC5}.Release|x64.Build.0 = Release|Any CPU
 		{33849B5D-B3AB-4A65-B370-80366E08DBC5}.Release|x86.ActiveCfg = Release|Any CPU
 		{33849B5D-B3AB-4A65-B370-80366E08DBC5}.Release|x86.Build.0 = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|x64.Build.0 = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Debug|x86.Build.0 = Debug|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|x64.ActiveCfg = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|x64.Build.0 = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|x86.ActiveCfg = Release|Any CPU
+		{2329497F-1A66-429C-8DF2-E30FCB993697}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

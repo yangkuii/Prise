@@ -16,14 +16,18 @@ namespace Prise.IntegrationTests
                  AppHostWebApplicationFactory factory)
         {
             _factory = factory;
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            var local = Environment.GetEnvironmentVariable("LOCAL") == "true";
+            if (local)
             {
-                AllowAutoRedirect = false,
-                BaseAddress = new Uri("https://localhost:5001")
-            });
-            // Run tests locally
-            //_client = new HttpClient();
-            //_client.BaseAddress = new Uri("https://localhost:5001");
+                _client = new HttpClient();
+                _client.BaseAddress = new Uri("https://localhost:5001");
+            }
+            else
+                _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false,
+                    BaseAddress = new Uri("https://localhost:5001")
+                });
         }
 
         protected async Task<T> Post<T>(HttpClient client, string pluginType, string endpoint, object content)

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Prise.Infrastructure;
 using Prise.Plugin;
+using Prise.Proxy;
 
 namespace Prise
 {
@@ -49,14 +52,17 @@ namespace Prise
 
             var sharedServices = this.sharedServicesProvider.ProvideSharedServices();
 
-            // TODO Loop over shared services and register remote types
-
             if (bootstrapper != null)
                 sharedServices = bootstrapper.Bootstrap(sharedServices);
 
-            var serviceProvider = sharedServices.BuildServiceProvider();
+            var localProvider = sharedServices.BuildServiceProvider();
 
-            return factoryMethod.Invoke(null, new[] { serviceProvider });
+            var pluginServices = new DefaultPluginServiceProvider(
+                localProvider,
+                sharedServices.Select(d => d.ServiceType).ToArray()
+            );
+
+            return factoryMethod.Invoke(null, new[] { pluginServices });
         }
 
         protected virtual void Dispose(bool disposing)

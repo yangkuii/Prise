@@ -6,14 +6,12 @@ using Prise.Proxy.Exceptions;
 
 namespace Prise.Proxy
 {
-    public class PriseProxy<T> : DispatchProxy, IDisposable
+    public static class PriseProxy
     {
-        private IParameterConverter parameterConverter;
-        private IResultConverter resultConverter;
-        private object remoteObject;
-        protected bool disposed = false;
+        public static object Invoke(object remoteObject, MethodInfo targetMethod, object[] args)
+            => Invoke(remoteObject, targetMethod, args, new PassthroughParameterConverter(), new PassthroughResultConverter());
 
-        protected override object Invoke(MethodInfo targetMethod, object[] args)
+        public static object Invoke(object remoteObject, MethodInfo targetMethod, object[] args, IParameterConverter parameterConverter, IResultConverter resultConverter)
         {
             try
             {
@@ -22,14 +20,14 @@ namespace Prise.Proxy
                 if (remoteMethod == null)
                     throw new PriseProxyException($"Target method {targetMethod.Name} is not found on Proxy Type {remoteObject.GetType().Name}.");
 
-                var result = remoteMethod.Invoke(remoteObject, SerializeParameters(remoteMethod, args));
+                var result = remoteMethod.Invoke(remoteObject, SerializeParameters(parameterConverter, remoteMethod, args));
 
                 var remoteType = remoteMethod.ReturnType;
                 if (remoteType.BaseType == typeof(System.Threading.Tasks.Task))
                 {
-                    return this.resultConverter.ConvertToLocalTypeAsync(localType, remoteType, result as System.Threading.Tasks.Task);
+                    return resultConverter.ConvertToLocalTypeAsync(localType, remoteType, result as System.Threading.Tasks.Task);
                 }
-                return this.resultConverter.ConvertToLocalType(localType, remoteType, result);
+                return resultConverter.ConvertToLocalType(localType, remoteType, result);
             }
             catch (Exception ex) when (ex is TargetInvocationException)
             {
@@ -37,36 +35,7 @@ namespace Prise.Proxy
             }
         }
 
-        public static object Create() => Create<T, PriseProxy<T>>();
-
-        internal PriseProxy<T> SetRemoteObject(object remoteObject)
-        {
-            if (remoteObject == null)
-                throw new PriseProxyException($"Remote object for Proxy<{typeof(T).Name}> was null");
-
-            this.remoteObject = remoteObject;
-            return this;
-        }
-
-        internal PriseProxy<T> SetParameterConverter(IParameterConverter parameterConverter)
-        {
-            if (parameterConverter == null)
-                throw new PriseProxyException($"IParameterConverter for Proxy<{typeof(T).Name}> was null");
-
-            this.parameterConverter = parameterConverter;
-            return this;
-        }
-
-        internal PriseProxy<T> SetResultConverter(IResultConverter resultConverter)
-        {
-            if (resultConverter == null)
-                throw new PriseProxyException($"IResultConverter for Proxy<{typeof(T).Name}> was null");
-
-            this.resultConverter = resultConverter;
-            return this;
-        }
-
-        private MethodInfo FindMethodOnRemoteObject(MethodInfo callingMethod, object targetObject)
+        internal static MethodInfo FindMethodOnRemoteObject(MethodInfo callingMethod, object targetObject)
         {
             bool isNameCorrect(MethodInfo targetMethod) => targetMethod.Name == callingMethod.Name;
 
@@ -106,7 +75,7 @@ namespace Prise.Proxy
             return targetMethods.First();
         }
 
-        private object[] SerializeParameters(MethodInfo targetMethod, object[] args)
+        internal static object[] SerializeParameters(IParameterConverter parameterConverter, MethodInfo targetMethod, object[] args)
         {
             var parameters = targetMethod.GetParameters();
             var results = new List<object>();
@@ -115,11 +84,51 @@ namespace Prise.Proxy
             {
                 var parameter = parameters[index];
                 var parameterValue = args[index];
-                results.Add(this.parameterConverter.ConvertToRemoteType(parameter.ParameterType, parameterValue));
+                results.Add(parameterConverter.ConvertToRemoteType(parameter.ParameterType, parameterValue));
             }
 
             return results.ToArray();
         }
+    }
+    public class PriseProxy<T> : DispatchProxy, IDisposable
+    {
+        private IParameterConverter parameterConverter;
+        private IResultConverter resultConverter;
+        private object remoteObject;
+        protected bool disposed = false;
+
+        protected override object Invoke(MethodInfo targetMethod, object[] args) => PriseProxy.Invoke(this.remoteObject, targetMethod, args, this.parameterConverter, this.resultConverter);
+
+        public static object Create() => Create<T, PriseProxy<T>>();
+
+        internal PriseProxy<T> SetRemoteObject(object remoteObject)
+        {
+            if (remoteObject == null)
+                throw new PriseProxyException($"Remote object for Proxy<{typeof(T).Name}> was null");
+
+            this.remoteObject = remoteObject;
+            return this;
+        }
+
+        internal PriseProxy<T> SetParameterConverter(IParameterConverter parameterConverter)
+        {
+            if (parameterConverter == null)
+                throw new PriseProxyException($"IParameterConverter for Proxy<{typeof(T).Name}> was null");
+
+            this.parameterConverter = parameterConverter;
+            return this;
+        }
+
+        internal PriseProxy<T> SetResultConverter(IResultConverter resultConverter)
+        {
+            if (resultConverter == null)
+                throw new PriseProxyException($"IResultConverter for Proxy<{typeof(T).Name}> was null");
+
+            this.resultConverter = resultConverter;
+            return this;
+        }
+
+
 
         protected virtual void Dispose(bool disposing)
         {

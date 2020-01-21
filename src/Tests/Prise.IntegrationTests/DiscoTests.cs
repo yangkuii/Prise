@@ -1,8 +1,4 @@
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Prise.IntegrationTestsHost.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Prise.IntegrationTests

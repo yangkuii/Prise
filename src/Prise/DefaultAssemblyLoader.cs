@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Prise.Infrastructure;
@@ -65,6 +67,7 @@ namespace Prise
                 this.nativeAssemblyUnloader,
                 this.assemblyLoadStrategyProvider
             );
+
 
             this.loadContexts[pluginAssemblyName] = loadContext;
             this.loadContextReferences[pluginAssemblyName] = new System.WeakReference(loadContext);

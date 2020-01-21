@@ -1,5 +1,9 @@
-﻿using Prise.Infrastructure;
+﻿#if NETCORE3_0
+using Prise.Infrastructure;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -97,3 +101,4 @@ namespace Prise
         }
     }
 }
+#endif

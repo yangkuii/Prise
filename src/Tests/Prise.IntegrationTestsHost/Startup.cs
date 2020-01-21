@@ -95,7 +95,6 @@ namespace Prise.IntegrationTestsHost
             var provider = new FileExtensionContentTypeProvider();
             // Add new mappings
             provider.Mappings[".dll"] = "application/x-msdownload";
-            var test = Directory.GetCurrentDirectory();
             app.UseStaticFiles(new StaticFileOptions
             {
                 ServeUnknownFileTypes = true,

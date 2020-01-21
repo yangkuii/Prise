@@ -459,7 +459,9 @@ namespace Prise
 
             foreach (var sharedService in services)
                 this
-                    .WithHostType(sharedService.ServiceType)
+                    // The service type must exist on the remote to support backwards compatability
+                    .WithRemoteType(sharedService.ServiceType)
+                    // The implementation type will always exist on the Host, since it will be created here
                     .WithHostType(sharedService.ImplementationType ?? sharedService.ImplementationInstance?.GetType() ?? sharedService.ImplementationFactory?.Method.ReturnType)
                 ; // If a shared service is added, it must be a added as a host type
 

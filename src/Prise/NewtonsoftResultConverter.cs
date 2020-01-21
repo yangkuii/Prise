@@ -1,10 +1,11 @@
+#if NETCORE2_1
 using System;
-using System.Text.Json;
+using Newtonsoft.Json;
 using Prise.Proxy;
 
 namespace Prise
 {
-    public class JsonSerializerResultConverter : ResultConverter
+    public class NewtonsoftResultConverter : ResultConverter
     {
         public override object Deserialize(Type localType, Type remoteType, object value)
         {
@@ -17,9 +18,10 @@ namespace Prise
                 resultType = localType.GenericTypeArguments[0];
             }
 
-            return JsonSerializer.Deserialize(
-                    JsonSerializer.Serialize(value), // First, serialize the object into a string
+            return JsonConvert.DeserializeObject(
+                    JsonConvert.SerializeObject(value), // First, serialize the object into a string
                     resultType); // Second, deserialize it using the correct type
         }
     }
 }
+#endif

@@ -1,7 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
 using System.Threading.Tasks;
 using Prise.IntegrationTestsHost.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Prise.IntegrationTests
@@ -12,9 +11,12 @@ namespace Prise.IntegrationTests
         public NetworkTests(
                  AppHostWebApplicationFactory factory) : base(factory) { }
 
-        [Fact]
+        [SkippableFact]
         public async Task PluginCFromNetwork_Works()
         {
+            var local = Environment.GetEnvironmentVariable("LOCAL") == "true";
+            Skip.IfNot(local);
+
             // Arrange
             var payload = new CalculationRequestModel
             {
@@ -29,9 +31,12 @@ namespace Prise.IntegrationTests
             Assert.Equal(110, result.Result);
         }
 
-        [Fact]
+
+        [SkippableFact]
         public async Task PluginCFromNetwork_int_Works()
         {
+            Skip.IfNot(Environment.GetEnvironmentVariable("LOCAL") == "true");
+
             // Arrange
             var payload = new CalculationRequestModel
             {
@@ -47,9 +52,11 @@ namespace Prise.IntegrationTests
         }
 
 
-        [Fact]
+        [SkippableFact]
         public async Task PluginCFromNetwork_complex_input_Works()
         {
+            Skip.IfNot(Environment.GetEnvironmentVariable("LOCAL") == "true");
+
             // Arrange
             var payload = new CalculationRequestModel
             {
@@ -65,9 +72,11 @@ namespace Prise.IntegrationTests
         }
 
 
-        [Fact]
+        [SkippableFact]
         public async Task PluginCFromNetwork_complex_output_Works()
         {
+            Skip.IfNot(Environment.GetEnvironmentVariable("LOCAL") == "true");
+
             // Arrange
             var payload = new CalculationRequestModel
             {
@@ -82,9 +91,11 @@ namespace Prise.IntegrationTests
             Assert.Equal(110, result.Result);
         }
 
-        [Fact]
+        [SkippableFact]
         public async Task PluginCFromNetwork_multi_Works()
         {
+            Skip.IfNot(Environment.GetEnvironmentVariable("LOCAL") == "true");
+
             // Arrange
             var payload = new CalculationRequestMultiModel
             {
@@ -110,9 +121,11 @@ namespace Prise.IntegrationTests
             Assert.Equal(198, result.Result);
         }
 
-        [Fact]
+        [SkippableFact]
         public async Task PluginCFromNetwork_multi_async_Works()
         {
+            Skip.IfNot(Environment.GetEnvironmentVariable("LOCAL") == "true");
+
             // Arrange
             var payload = new CalculationRequestMultiModel
             {

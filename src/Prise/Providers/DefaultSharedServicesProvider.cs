@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Prise.Infrastructure;
-using System;
+﻿using System;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Prise.Infrastructure;
 
 namespace Prise
 {
